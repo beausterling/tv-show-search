@@ -13,6 +13,8 @@ const genreSelect = document.querySelector("#genre-filter");
 
 // the first 6 shows from the latest search
 let shows = [];
+// counts searches, so a slow older response can't replace newer results
+let searchCount = 0;
 
 searchForm.addEventListener("submit", (event) => {
   event.preventDefault();
@@ -23,6 +25,8 @@ sortSelect.addEventListener("change", renderShows);
 genreSelect.addEventListener("change", renderShows);
 
 async function searchShows(searchTerm) {
+  searchCount++;
+  const thisSearch = searchCount;
   shows = [];
   updateGenreOptions();
 
@@ -42,6 +46,9 @@ async function searchShows(searchTerm) {
     }
     const data = await response.json();
 
+    // the user started a new search while we were waiting, so ignore this one
+    if (thisSearch !== searchCount) return;
+
     if (data.length === 0) {
       showMessage(`No shows found for "${searchTerm}". Check the spelling or try another title.`);
       return;
@@ -51,6 +58,7 @@ async function searchShows(searchTerm) {
     updateGenreOptions();
     renderShows();
   } catch (error) {
+    if (thisSearch !== searchCount) return;
     console.error(error);
     showMessage("Sorry, something went wrong while loading shows. Please check your connection and try again.", true);
   }
