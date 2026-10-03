@@ -9,6 +9,7 @@ const resultsTitle = document.querySelector(".results__title");
 const resultsStatus = document.querySelector(".results__status");
 const showsEl = document.querySelector(".shows");
 const sortSelect = document.querySelector("#sort");
+const genreSelect = document.querySelector("#genre-filter");
 
 // the first 6 shows from the latest search
 let shows = [];
@@ -19,12 +20,14 @@ searchForm.addEventListener("submit", (event) => {
 });
 
 sortSelect.addEventListener("change", renderShows);
+genreSelect.addEventListener("change", renderShows);
 
 async function searchShows(searchTerm) {
   resultsTitle.textContent = `Search results for "${searchTerm}"`;
   const response = await fetch(API_URL + encodeURIComponent(searchTerm));
   const data = await response.json();
   shows = data.slice(0, MAX_RESULTS).map((result) => simplifyShow(result.show));
+  updateGenreOptions();
   renderShows();
 }
 
@@ -41,11 +44,32 @@ function simplifyShow(show) {
   };
 }
 
+// fill the genre dropdown with the genres of the current results
+function updateGenreOptions() {
+  const genres = [];
+  shows.forEach((show) => {
+    show.genres.forEach((genre) => {
+      if (!genres.includes(genre)) {
+        genres.push(genre);
+      }
+    });
+  });
+  genres.sort();
+  genreSelect.innerHTML =
+    `<option value="all">All genres</option>` +
+    genres.map((genre) => `<option value="${escapeHTML(genre)}">${escapeHTML(genre)}</option>`).join("");
+}
+
 function renderShows() {
-  // copy the array so "Best match" can always go back to the API's order
-  const showsToRender = sortShows([...shows]);
+  const genre = genreSelect.value;
+  // filter() returns a new array, so "Best match" can always go back to the API's order
+  const filteredShows = shows.filter((show) => genre === "all" || show.genres.includes(genre));
+  const showsToRender = sortShows(filteredShows);
   showsEl.innerHTML = showsToRender.map((show) => showHTML(show)).join("");
-  resultsStatus.textContent = `Showing ${showsToRender.length} ${showsToRender.length === 1 ? "show" : "shows"}`;
+
+  const count = showsToRender.length;
+  const label = genre === "all" ? "" : `${genre} `;
+  resultsStatus.textContent = `Showing ${count} ${label}${count === 1 ? "show" : "shows"}`;
 }
 
 function sortShows(list) {
