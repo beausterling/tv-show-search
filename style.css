@@ -75,8 +75,9 @@ a {
   color: #fff;
 }
 
-.nav__logo .fa-tv {
-  color: #7c4dff;
+.nav__logo .fa-tv,
+.nav__logo .highlight {
+  color: #a78bfa;
 }
 
 .nav__links {
