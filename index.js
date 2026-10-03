@@ -23,13 +23,37 @@ sortSelect.addEventListener("change", renderShows);
 genreSelect.addEventListener("change", renderShows);
 
 async function searchShows(searchTerm) {
+  shows = [];
+  updateGenreOptions();
+
+  if (searchTerm === "") {
+    resultsTitle.textContent = "Search results";
+    showMessage("Please type the name of a show to search for.");
+    return;
+  }
+
   resultsTitle.textContent = `Search results for "${searchTerm}"`;
   showSkeleton();
-  const response = await fetch(API_URL + encodeURIComponent(searchTerm));
-  const data = await response.json();
-  shows = data.slice(0, MAX_RESULTS).map((result) => simplifyShow(result.show));
-  updateGenreOptions();
-  renderShows();
+
+  try {
+    const response = await fetch(API_URL + encodeURIComponent(searchTerm));
+    if (!response.ok) {
+      throw new Error(`TVmaze returned status ${response.status}`);
+    }
+    const data = await response.json();
+
+    if (data.length === 0) {
+      showMessage(`No shows found for "${searchTerm}". Check the spelling or try another title.`);
+      return;
+    }
+
+    shows = data.slice(0, MAX_RESULTS).map((result) => simplifyShow(result.show));
+    updateGenreOptions();
+    renderShows();
+  } catch (error) {
+    console.error(error);
+    showMessage("Sorry, something went wrong while loading shows. Please check your connection and try again.", true);
+  }
 }
 
 // only keep the parts of the show we need, and fill in missing posters and years
@@ -64,6 +88,7 @@ function updateGenreOptions() {
 // grey placeholder cards while we wait for the API
 function showSkeleton() {
   resultsStatus.textContent = "Loading shows...";
+  resultsStatus.classList.remove("results__status--message", "results__status--error");
   showsEl.setAttribute("aria-busy", "true");
   showsEl.innerHTML = new Array(MAX_RESULTS).fill(skeletonHTML()).join("");
 }
@@ -79,7 +104,19 @@ function skeletonHTML() {
   </div>`;
 }
 
+// used for the empty search, no results and error states
+function showMessage(message, isError = false) {
+  showsEl.innerHTML = "";
+  showsEl.removeAttribute("aria-busy");
+  resultsStatus.textContent = message;
+  resultsStatus.classList.add("results__status--message");
+  resultsStatus.classList.toggle("results__status--error", isError);
+}
+
 function renderShows() {
+  // nothing to sort or filter until a search has returned some shows
+  if (shows.length === 0) return;
+
   const genre = genreSelect.value;
   // filter() returns a new array, so "Best match" can always go back to the API's order
   const filteredShows = shows.filter((show) => genre === "all" || show.genres.includes(genre));
@@ -90,6 +127,7 @@ function renderShows() {
   const count = showsToRender.length;
   const label = genre === "all" ? "" : `${genre} `;
   resultsStatus.textContent = `Showing ${count} ${label}${count === 1 ? "show" : "shows"}`;
+  resultsStatus.classList.remove("results__status--message", "results__status--error");
 }
 
 function sortShows(list) {

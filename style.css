@@ -241,7 +241,7 @@ a {
   align-items: flex-end;
   flex-wrap: wrap;
   gap: 24px;
-  margin-bottom: 32px;
+  margin-bottom: 16px;
 }
 
 .results__title {
@@ -251,7 +251,7 @@ a {
 }
 
 .results__status {
-  margin-top: 4px;
+  margin-bottom: 24px;
   color: #5b5d77;
 }
 
@@ -396,4 +396,21 @@ a {
   .skeleton {
     animation: none;
   }
+}
+
+/* MESSAGES */
+
+.results__status--message {
+  padding: 20px 24px;
+  font-size: 18px;
+  color: #1f2033;
+  background-color: #fff;
+  border-left: 4px solid #7c4dff;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(31, 32, 51, 0.08);
+}
+
+.results__status--error {
+  color: #9b1c31;
+  border-left-color: #d62d4a;
 }
