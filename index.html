@@ -4,10 +4,42 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ShowFinder | Search TV Shows</title>
+  <meta name="description" content="Search for TV shows with the TVmaze API, then sort and filter the results.">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
   <link rel="stylesheet" href="style.css">
   <script src="index.js" defer></script>
 </head>
 <body>
+  <nav class="nav">
+    <div class="container nav__container">
+      <a href="#" class="nav__logo">
+        <i class="fa-solid fa-tv" aria-hidden="true"></i>
+        Show<span class="highlight">Finder</span>
+      </a>
+      <ul class="nav__links">
+        <li><a href="#" class="nav__link">Home</a></li>
+        <li><a href="#search" class="nav__link">Search</a></li>
+        <li><a href="#results" class="nav__link">Results</a></li>
+      </ul>
+    </div>
+  </nav>
 
+  <header class="header" id="search">
+    <div class="container header__content">
+      <h1 class="header__title">Find your next favourite <span class="highlight">TV show</span></h1>
+      <p class="header__para">Search thousands of shows from around the world and see when they first aired.</p>
+      <form class="search" role="search">
+        <label for="search-input" class="visually-hidden">Search for a TV show</label>
+        <input type="search" id="search-input" class="search__input" placeholder="Search by title, e.g. The Office" autocomplete="off">
+        <button type="submit" class="search__btn" aria-label="Search">
+          <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+        </button>
+      </form>
+    </div>
+  </header>
+
+  <main id="results">
+  </main>
 </body>
 </html>
