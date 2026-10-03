@@ -254,3 +254,61 @@ a {
   margin-top: 4px;
   color: #5b5d77;
 }
+
+/* SHOW CARDS */
+
+.shows {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 24px;
+}
+
+.show {
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(31, 32, 51, 0.08);
+  overflow: hidden;
+  transition: transform 300ms ease, box-shadow 300ms ease;
+}
+
+.show:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 28px rgba(31, 32, 51, 0.16);
+}
+
+.show__link {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.show__img-wrapper {
+  aspect-ratio: 210 / 295;
+  background-color: #2a2742;
+}
+
+.show__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.show__info {
+  padding: 12px 14px 16px;
+}
+
+.show__title {
+  font-size: 16px;
+  line-height: 1.3;
+  margin-bottom: 4px;
+}
+
+.show__year {
+  font-weight: 600;
+  color: #7c4dff;
+}
+
+.show__genres {
+  font-size: 13px;
+  color: #5b5d77;
+}

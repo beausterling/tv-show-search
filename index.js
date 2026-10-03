@@ -1,9 +1,16 @@
 // TVmaze search API: https://api.tvmaze.com/search/shows?q=<search term>
 const API_URL = "https://api.tvmaze.com/search/shows?q=";
+const MAX_RESULTS = 6;
+const PLACEHOLDER_IMG = "assets/no-poster.svg";
 
 const searchForm = document.querySelector(".search");
 const searchInput = document.querySelector("#search-input");
 const resultsTitle = document.querySelector(".results__title");
+const resultsStatus = document.querySelector(".results__status");
+const showsEl = document.querySelector(".shows");
+
+// the first 6 shows from the latest search
+let shows = [];
 
 searchForm.addEventListener("submit", (event) => {
   event.preventDefault();
@@ -14,5 +21,51 @@ async function searchShows(searchTerm) {
   resultsTitle.textContent = `Search results for "${searchTerm}"`;
   const response = await fetch(API_URL + encodeURIComponent(searchTerm));
   const data = await response.json();
-  console.log(data);
+  shows = data.slice(0, MAX_RESULTS).map((result) => simplifyShow(result.show));
+  renderShows();
+}
+
+// only keep the parts of the show we need, and fill in missing posters and years
+function simplifyShow(show) {
+  return {
+    title: show.name,
+    premiered: show.premiered, // "2005-03-24", or null if TVmaze doesn't know
+    year: show.premiered ? show.premiered.slice(0, 4) : "Year unknown",
+    poster: show.image ? show.image.medium : PLACEHOLDER_IMG,
+    hasPoster: Boolean(show.image),
+    genres: show.genres,
+    url: show.url,
+  };
+}
+
+function renderShows() {
+  showsEl.innerHTML = shows.map((show) => showHTML(show)).join("");
+  resultsStatus.textContent = `Showing ${shows.length} ${shows.length === 1 ? "show" : "shows"}`;
+}
+
+function showHTML(show) {
+  const altText = show.hasPoster ? `${show.title} poster` : `No poster available for ${show.title}`;
+  const genres = show.genres.length ? show.genres.join(", ") : "No genre listed";
+  return `<article class="show">
+    <a href="${escapeHTML(show.url)}" class="show__link" target="_blank" rel="noopener">
+      <figure class="show__img-wrapper">
+        <img src="${escapeHTML(show.poster)}" class="show__img" alt="${escapeHTML(altText)}">
+      </figure>
+      <div class="show__info">
+        <h3 class="show__title">${escapeHTML(show.title)}</h3>
+        <p class="show__year">${show.year}</p>
+        <p class="show__genres">${escapeHTML(genres)}</p>
+      </div>
+    </a>
+  </article>`;
+}
+
+// show titles come from the API, so escape them before putting them into HTML
+function escapeHTML(text) {
+  return String(text)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }
