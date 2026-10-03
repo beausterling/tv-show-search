@@ -8,6 +8,7 @@ const searchInput = document.querySelector("#search-input");
 const resultsTitle = document.querySelector(".results__title");
 const resultsStatus = document.querySelector(".results__status");
 const showsEl = document.querySelector(".shows");
+const sortSelect = document.querySelector("#sort");
 
 // the first 6 shows from the latest search
 let shows = [];
@@ -16,6 +17,8 @@ searchForm.addEventListener("submit", (event) => {
   event.preventDefault();
   searchShows(searchInput.value.trim());
 });
+
+sortSelect.addEventListener("change", renderShows);
 
 async function searchShows(searchTerm) {
   resultsTitle.textContent = `Search results for "${searchTerm}"`;
@@ -39,8 +42,34 @@ function simplifyShow(show) {
 }
 
 function renderShows() {
-  showsEl.innerHTML = shows.map((show) => showHTML(show)).join("");
-  resultsStatus.textContent = `Showing ${shows.length} ${shows.length === 1 ? "show" : "shows"}`;
+  // copy the array so "Best match" can always go back to the API's order
+  const showsToRender = sortShows([...shows]);
+  showsEl.innerHTML = showsToRender.map((show) => showHTML(show)).join("");
+  resultsStatus.textContent = `Showing ${showsToRender.length} ${showsToRender.length === 1 ? "show" : "shows"}`;
+}
+
+function sortShows(list) {
+  const sortBy = sortSelect.value;
+  if (sortBy === "az") {
+    list.sort((a, b) => a.title.localeCompare(b.title));
+  } else if (sortBy === "za") {
+    list.sort((a, b) => b.title.localeCompare(a.title));
+  } else if (sortBy === "newest") {
+    list.sort((a, b) => compareDates(a, b, "newest"));
+  } else if (sortBy === "oldest") {
+    list.sort((a, b) => compareDates(a, b, "oldest"));
+  }
+  return list;
+}
+
+function compareDates(a, b, order) {
+  // shows without a premiere date always go to the end of the list
+  if (!a.premiered && !b.premiered) return 0;
+  if (!a.premiered) return 1;
+  if (!b.premiered) return -1;
+  // dates are "YYYY-MM-DD" strings, so comparing them as text sorts them by date
+  const result = a.premiered.localeCompare(b.premiered);
+  return order === "newest" ? -result : result;
 }
 
 function showHTML(show) {

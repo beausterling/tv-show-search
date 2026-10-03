@@ -47,6 +47,18 @@
             <h2 class="results__title">Search results</h2>
             <p class="results__status" role="status">Type a show name above and press Enter to see results.</p>
           </div>
+          <div class="results__controls">
+            <div class="control">
+              <label for="sort" class="control__label">Sort by</label>
+              <select id="sort" class="control__select">
+                <option value="default">Best match</option>
+                <option value="az">Title, A to Z</option>
+                <option value="za">Title, Z to A</option>
+                <option value="newest">Newest to oldest</option>
+                <option value="oldest">Oldest to newest</option>
+              </select>
+            </div>
+          </div>
         </div>
         <div class="shows"></div>
       </div>

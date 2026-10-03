@@ -312,3 +312,38 @@ a {
   font-size: 13px;
   color: #5b5d77;
 }
+
+/* SORT AND FILTER CONTROLS */
+
+.results__controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.control {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.control__label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #5b5d77;
+}
+
+.control__select {
+  min-width: 190px;
+  padding: 10px 12px;
+  font: inherit;
+  color: #1f2033;
+  background-color: #fff;
+  border: 1px solid #d3d4e3;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.control__select:hover {
+  border-color: #7c4dff;
+}
