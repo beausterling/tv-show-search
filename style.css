@@ -347,3 +347,53 @@ a {
 .control__select:hover {
   border-color: #7c4dff;
 }
+
+/* SKELETON LOADING STATE */
+
+.show--skeleton:hover {
+  transform: none;
+  box-shadow: 0 4px 16px rgba(31, 32, 51, 0.08);
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #e4e5ef 25%, #f1f2f8 50%, #e4e5ef 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.2s infinite linear;
+}
+
+.skeleton__title,
+.skeleton__year,
+.skeleton__genres {
+  height: 14px;
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+
+.skeleton__title {
+  width: 85%;
+  height: 18px;
+}
+
+.skeleton__year {
+  width: 35%;
+}
+
+.skeleton__genres {
+  width: 60%;
+  margin-bottom: 0;
+}
+
+@keyframes shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
+  }
+}

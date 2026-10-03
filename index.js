@@ -24,6 +24,7 @@ genreSelect.addEventListener("change", renderShows);
 
 async function searchShows(searchTerm) {
   resultsTitle.textContent = `Search results for "${searchTerm}"`;
+  showSkeleton();
   const response = await fetch(API_URL + encodeURIComponent(searchTerm));
   const data = await response.json();
   shows = data.slice(0, MAX_RESULTS).map((result) => simplifyShow(result.show));
@@ -60,12 +61,31 @@ function updateGenreOptions() {
     genres.map((genre) => `<option value="${escapeHTML(genre)}">${escapeHTML(genre)}</option>`).join("");
 }
 
+// grey placeholder cards while we wait for the API
+function showSkeleton() {
+  resultsStatus.textContent = "Loading shows...";
+  showsEl.setAttribute("aria-busy", "true");
+  showsEl.innerHTML = new Array(MAX_RESULTS).fill(skeletonHTML()).join("");
+}
+
+function skeletonHTML() {
+  return `<div class="show show--skeleton" aria-hidden="true">
+    <div class="show__img-wrapper skeleton"></div>
+    <div class="show__info">
+      <div class="skeleton skeleton__title"></div>
+      <div class="skeleton skeleton__year"></div>
+      <div class="skeleton skeleton__genres"></div>
+    </div>
+  </div>`;
+}
+
 function renderShows() {
   const genre = genreSelect.value;
   // filter() returns a new array, so "Best match" can always go back to the API's order
   const filteredShows = shows.filter((show) => genre === "all" || show.genres.includes(genre));
   const showsToRender = sortShows(filteredShows);
   showsEl.innerHTML = showsToRender.map((show) => showHTML(show)).join("");
+  showsEl.removeAttribute("aria-busy");
 
   const count = showsToRender.length;
   const label = genre === "all" ? "" : `${genre} `;
