@@ -131,6 +131,7 @@ function renderShows() {
   const showsToRender = sortShows(filteredShows);
   showsEl.innerHTML = showsToRender.map((show) => showHTML(show)).join("");
   showsEl.removeAttribute("aria-busy");
+  addPosterFallbacks();
 
   const count = showsToRender.length;
   const label = genre === "all" ? "" : `${genre} `;
@@ -160,6 +161,17 @@ function compareDates(a, b, order) {
   // dates are "YYYY-MM-DD" strings, so comparing them as text sorts them by date
   const result = a.premiered.localeCompare(b.premiered);
   return order === "newest" ? -result : result;
+}
+
+// if a poster link is broken, swap in the placeholder image instead
+function addPosterFallbacks() {
+  showsEl.querySelectorAll(".show__img").forEach((img) => {
+    img.addEventListener("error", () => {
+      const title = img.closest(".show").querySelector(".show__title").textContent;
+      img.src = PLACEHOLDER_IMG;
+      img.alt = `No poster available for ${title}`;
+    }, { once: true });
+  });
 }
 
 function showHTML(show) {
