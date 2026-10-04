@@ -1,20 +1,15 @@
-// TVmaze search API: https://api.tvmaze.com/search/shows?q=<search term>
+// https://api.tvmaze.com/search/shows?q=office
 const API_URL = "https://api.tvmaze.com/search/shows?q=";
-const MAX_RESULTS = 6;
-const PLACEHOLDER_IMG = "assets/no-poster.svg";
 
 const searchForm = document.querySelector(".search");
 const searchInput = document.querySelector("#search-input");
 const resultsTitle = document.querySelector(".results__title");
-const resultsStatus = document.querySelector(".results__status");
+const resultsMessage = document.querySelector(".results__message");
 const showsEl = document.querySelector(".shows");
 const sortSelect = document.querySelector("#sort");
-const genreSelect = document.querySelector("#genre-filter");
+const genreSelect = document.querySelector("#genre");
 
-// the first 6 shows from the latest search
 let shows = [];
-// counts searches, so a slow older response can't replace newer results
-let searchCount = 0;
 
 searchForm.addEventListener("submit", (event) => {
   event.preventDefault();
@@ -25,178 +20,94 @@ sortSelect.addEventListener("change", renderShows);
 genreSelect.addEventListener("change", renderShows);
 
 async function searchShows(searchTerm) {
-  searchCount++;
-  const thisSearch = searchCount;
-  shows = [];
-  updateGenreOptions();
-
-  if (searchTerm === "") {
+  if (!searchTerm) {
+    shows = [];
+    updateGenres();
     resultsTitle.textContent = "Search results";
-    showMessage("Please type the name of a show to search for.");
+    showsEl.innerHTML = "";
+    resultsMessage.textContent = "Please type the name of a show.";
     return;
   }
 
   resultsTitle.textContent = `Search results for "${searchTerm}"`;
+  resultsMessage.textContent = "";
   showSkeleton();
 
   try {
-    const response = await fetch(API_URL + encodeURIComponent(searchTerm));
-    if (!response.ok) {
-      throw new Error(`TVmaze returned status ${response.status}`);
-    }
+    const response = await fetch(API_URL + searchTerm);
     const data = await response.json();
 
-    // the user started a new search while we were waiting, so ignore this one
-    if (thisSearch !== searchCount) return;
+    // only keep the first 6 shows
+    shows = data.slice(0, 6).map((result) => result.show);
 
-    if (data.length === 0) {
-      showMessage(`No shows found for "${searchTerm}". Check the spelling or try another title.`);
+    updateGenres();
+
+    if (shows.length === 0) {
+      showsEl.innerHTML = "";
+      resultsMessage.textContent = "No shows found. Try another title.";
       return;
     }
 
-    shows = data.slice(0, MAX_RESULTS).map((result) => simplifyShow(result.show));
-    updateGenreOptions();
     renderShows();
   } catch (error) {
-    if (thisSearch !== searchCount) return;
-    console.error(error);
-    showMessage("Sorry, something went wrong while loading shows. Please check your connection and try again.", true);
+    showsEl.innerHTML = "";
+    resultsMessage.textContent = "Something went wrong. Please try again.";
   }
-}
-
-// only keep the parts of the show we need, and fill in missing posters and years
-function simplifyShow(show) {
-  return {
-    title: show.name,
-    premiered: show.premiered, // "2005-03-24", or null if TVmaze doesn't know
-    year: show.premiered ? show.premiered.slice(0, 4) : "Year unknown",
-    poster: show.image ? show.image.medium : PLACEHOLDER_IMG,
-    hasPoster: Boolean(show.image),
-    genres: show.genres,
-    url: show.url,
-  };
-}
-
-// fill the genre dropdown with the genres of the current results
-function updateGenreOptions() {
-  const genres = [];
-  shows.forEach((show) => {
-    show.genres.forEach((genre) => {
-      if (!genres.includes(genre)) {
-        genres.push(genre);
-      }
-    });
-  });
-  genres.sort();
-  genreSelect.innerHTML =
-    `<option value="all">All genres</option>` +
-    genres.map((genre) => `<option value="${escapeHTML(genre)}">${escapeHTML(genre)}</option>`).join("");
-}
-
-// grey placeholder cards while we wait for the API
-function showSkeleton() {
-  resultsStatus.textContent = "Loading shows...";
-  resultsStatus.classList.remove("results__status--message", "results__status--error");
-  showsEl.setAttribute("aria-busy", "true");
-  showsEl.innerHTML = new Array(MAX_RESULTS).fill(skeletonHTML()).join("");
-}
-
-function skeletonHTML() {
-  return `<div class="show show--skeleton" aria-hidden="true">
-    <div class="show__img-wrapper skeleton"></div>
-    <div class="show__info">
-      <div class="skeleton skeleton__title"></div>
-      <div class="skeleton skeleton__year"></div>
-      <div class="skeleton skeleton__genres"></div>
-    </div>
-  </div>`;
-}
-
-// used for the empty search, no results and error states
-function showMessage(message, isError = false) {
-  showsEl.innerHTML = "";
-  showsEl.removeAttribute("aria-busy");
-  resultsStatus.textContent = message;
-  resultsStatus.classList.add("results__status--message");
-  resultsStatus.classList.toggle("results__status--error", isError);
 }
 
 function renderShows() {
-  // nothing to sort or filter until a search has returned some shows
-  if (shows.length === 0) return;
+  let list = shows.slice();
 
-  const genre = genreSelect.value;
-  // filter() returns a new array, so "Best match" can always go back to the API's order
-  const filteredShows = shows.filter((show) => genre === "all" || show.genres.includes(genre));
-  const showsToRender = sortShows(filteredShows);
-  showsEl.innerHTML = showsToRender.map((show) => showHTML(show)).join("");
-  showsEl.removeAttribute("aria-busy");
-  addPosterFallbacks();
-
-  const count = showsToRender.length;
-  const label = genre === "all" ? "" : `${genre} `;
-  resultsStatus.textContent = `Showing ${count} ${label}${count === 1 ? "show" : "shows"}`;
-  resultsStatus.classList.remove("results__status--message", "results__status--error");
-}
-
-function sortShows(list) {
-  const sortBy = sortSelect.value;
-  if (sortBy === "az") {
-    list.sort((a, b) => a.title.localeCompare(b.title));
-  } else if (sortBy === "za") {
-    list.sort((a, b) => b.title.localeCompare(a.title));
-  } else if (sortBy === "newest") {
-    list.sort((a, b) => compareDates(a, b, "newest"));
-  } else if (sortBy === "oldest") {
-    list.sort((a, b) => compareDates(a, b, "oldest"));
+  if (genreSelect.value !== "ALL") {
+    list = list.filter((show) => show.genres.includes(genreSelect.value));
   }
-  return list;
+
+  if (sortSelect.value === "A_TO_Z") {
+    list.sort((a, b) => a.name.localeCompare(b.name));
+  } else if (sortSelect.value === "Z_TO_A") {
+    list.sort((a, b) => b.name.localeCompare(a.name));
+  } else if (sortSelect.value === "NEWEST") {
+    list.sort((a, b) => getYear(b) - getYear(a));
+  } else if (sortSelect.value === "OLDEST") {
+    list.sort((a, b) => getYear(a) - getYear(b));
+  }
+
+  showsEl.innerHTML = list.map((show) => showHTML(show)).join("");
 }
 
-function compareDates(a, b, order) {
-  // shows without a premiere date always go to the end of the list
-  if (!a.premiered && !b.premiered) return 0;
-  if (!a.premiered) return 1;
-  if (!b.premiered) return -1;
-  // dates are "YYYY-MM-DD" strings, so comparing them as text sorts them by date
-  const result = a.premiered.localeCompare(b.premiered);
-  return order === "newest" ? -result : result;
+// some shows don't have a premiere date, so treat them as year 0
+function getYear(show) {
+  return show.premiered ? Number(show.premiered.slice(0, 4)) : 0;
 }
 
-// if a poster link is broken, swap in the placeholder image instead
-function addPosterFallbacks() {
-  showsEl.querySelectorAll(".show__img").forEach((img) => {
-    img.addEventListener("error", () => {
-      const title = img.closest(".show").querySelector(".show__title").textContent;
-      img.src = PLACEHOLDER_IMG;
-      img.alt = `No poster available for ${title}`;
-    }, { once: true });
+function updateGenres() {
+  const genres = [];
+  shows.forEach((show) => {
+    show.genres.forEach((genre) => {
+      if (!genres.includes(genre)) genres.push(genre);
+    });
   });
+  genreSelect.innerHTML =
+    `<option value="ALL">All genres</option>` +
+    genres.map((genre) => `<option value="${genre}">${genre}</option>`).join("");
+}
+
+function showSkeleton() {
+  showsEl.innerHTML = new Array(6)
+    .fill(`<div class="show">
+      <div class="show__img skeleton"></div>
+      <div class="skeleton skeleton__title"></div>
+      <div class="skeleton skeleton__year"></div>
+    </div>`)
+    .join("");
 }
 
 function showHTML(show) {
-  const altText = show.hasPoster ? `${show.title} poster` : `No poster available for ${show.title}`;
-  const genres = show.genres.length ? show.genres.join(", ") : "No genre listed";
-  return `<article class="show">
-    <a href="${escapeHTML(show.url)}" class="show__link" target="_blank" rel="noopener">
-      <figure class="show__img-wrapper">
-        <img src="${escapeHTML(show.poster)}" class="show__img" alt="${escapeHTML(altText)}">
-      </figure>
-      <div class="show__info">
-        <h3 class="show__title">${escapeHTML(show.title)}</h3>
-        <p class="show__year">${show.year}</p>
-        <p class="show__genres">${escapeHTML(genres)}</p>
-      </div>
-    </a>
-  </article>`;
-}
-
-// show titles come from the API, so escape them before putting them into HTML
-function escapeHTML(text) {
-  return String(text)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
+  const poster = show.image ? show.image.medium : "assets/no-poster.svg";
+  const year = show.premiered ? show.premiered.slice(0, 4) : "Unknown year";
+  return `<div class="show">
+    <img src="${poster}" class="show__img" alt="${show.name} poster">
+    <h3 class="show__title">${show.name}</h3>
+    <p class="show__year">${year}</p>
+  </div>`;
 }

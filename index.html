@@ -3,87 +3,65 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ShowFinder | Search TV Shows</title>
-  <meta name="description" content="Search for TV shows with the TVmaze API, then sort and filter the results.">
-  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <title>TV Show Search</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   <script src="index.js" defer></script>
 </head>
 <body>
-  <nav class="nav">
-    <div class="container nav__container">
-      <a href="#" class="nav__logo">
-        <i class="fa-solid fa-tv" aria-hidden="true"></i>
-        <span>Show<span class="highlight">Finder</span></span>
-      </a>
+  <nav>
+    <div class="container nav__row">
+      <a href="#" class="nav__logo">TV Show Search</a>
       <ul class="nav__links">
         <li><a href="#" class="nav__link">Home</a></li>
-        <li><a href="#search" class="nav__link">Search</a></li>
         <li><a href="#results" class="nav__link">Results</a></li>
       </ul>
     </div>
   </nav>
 
-  <header class="header" id="search">
-    <div class="container header__content">
-      <h1 class="header__title">Find your next favorite <span class="highlight">TV show</span></h1>
-      <p class="header__para">Search thousands of shows from around the world and see when they first aired.</p>
-      <form class="search" role="search">
-        <label for="search-input" class="visually-hidden">Search for a TV show</label>
-        <input type="search" id="search-input" class="search__input" placeholder="Search by title, e.g. The Office" autocomplete="off">
-        <button type="submit" class="search__btn" aria-label="Search">
-          <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
-        </button>
+  <header>
+    <div class="container">
+      <h1 class="header__title">Browse our shows</h1>
+      <form class="search">
+        <label for="search-input" class="search__label">Search for a TV show</label>
+        <div class="search__row">
+          <input type="text" id="search-input" class="search__input" placeholder="e.g. The Office">
+          <button type="submit" class="search__btn">Search</button>
+        </div>
       </form>
     </div>
   </header>
 
   <main id="results">
-    <section class="results">
-      <div class="container">
-        <div class="results__header">
-          <h2 class="results__title">Search results</h2>
-          <div class="results__controls">
-            <div class="control">
-              <label for="sort" class="control__label">Sort by</label>
-              <select id="sort" class="control__select">
-                <option value="default">Best match</option>
-                <option value="az">Title, A to Z</option>
-                <option value="za">Title, Z to A</option>
-                <option value="newest">Newest to oldest</option>
-                <option value="oldest">Oldest to newest</option>
-              </select>
-            </div>
-            <div class="control">
-              <label for="genre-filter" class="control__label">Genre</label>
-              <select id="genre-filter" class="control__select">
-                <option value="all">All genres</option>
-              </select>
-            </div>
-          </div>
+    <div class="container">
+      <div class="results__header">
+        <h2 class="results__title">Search results</h2>
+        <div class="results__controls">
+          <label for="sort">Sort by</label>
+          <select id="sort">
+            <option value="" disabled selected>Sort</option>
+            <option value="A_TO_Z">Title, A to Z</option>
+            <option value="Z_TO_A">Title, Z to A</option>
+            <option value="NEWEST">Newest to oldest</option>
+            <option value="OLDEST">Oldest to newest</option>
+          </select>
+          <label for="genre">Genre</label>
+          <select id="genre">
+            <option value="ALL">All genres</option>
+          </select>
         </div>
-        <p class="results__status results__status--message" role="status">Type a show name above and press Enter to see results.</p>
-        <div class="shows"></div>
       </div>
-    </section>
+      <p class="results__message">Search for a show to see results.</p>
+      <div class="shows"></div>
+    </div>
   </main>
 
-  <footer class="footer">
-    <div class="container footer__container">
-      <a href="#" class="nav__logo footer__logo">
-        <i class="fa-solid fa-tv" aria-hidden="true"></i>
-        <span>Show<span class="highlight">Finder</span></span>
-      </a>
-      <ul class="footer__links">
-        <li><a href="#" class="footer__link">Home</a></li>
-        <li><a href="#search" class="footer__link">Search</a></li>
-        <li><a href="#results" class="footer__link">Results</a></li>
-      </ul>
-      <p class="footer__copyright">
-        Copyright &copy; 2026 <a href="https://github.com/beausterling" class="footer__link" target="_blank" rel="noopener">Beau Sterling</a>.
-        Show data from <a href="https://www.tvmaze.com/api" class="footer__link" target="_blank" rel="noopener">TVmaze</a>.
-      </p>
+  <footer>
+    <div class="container">
+      <p>Copyright &copy; 2026 Beau Sterling</p>
+      <p>Show data from <a href="https://www.tvmaze.com/api" target="_blank">TVmaze</a></p>
     </div>
   </footer>
 </body>
